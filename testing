@@ -1,0 +1,14 @@
+import threading
+
+def func1():
+    pass
+
+def func2():
+    pass
+
+def func3():
+    pass
+
+funcs_to_run = [func1, func2, func3]
+
+threads = [threading.Thread(target=func, args=[]) for func in funcs_to_run]

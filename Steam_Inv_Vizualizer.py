@@ -1,8 +1,11 @@
 from tkinter import *
 from tkinter.ttk import Combobox
 from tkinter import ttk
+from tkinter import filedialog
 import json
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
+import numpy as np
 
 inventory = json.load(open('inventory_new.json', 'r'))
 item_list = []
@@ -12,6 +15,8 @@ current_chk = 0
 x_all = []
 y_all = []
 
+# for i in inventory['total']['total_price'].items():
+#     print(f'{i[0]}: {i[1] * inventory["total"]["rub_usd"][i[0]]}')
 def update_type_list(type, item):
     if type.get() == 0 and item in type_list:
         type_list.remove(item)
@@ -25,6 +30,7 @@ def update_type_list(type, item):
     combo.current(0)
 
 def clicked():
+    """ Вывести график цены выбранного предмета """
     x = []
     y = []
     selected_item = combo.get()
@@ -37,7 +43,22 @@ def clicked():
     plt.show()
 
 def clicked_all():
+    """ Вывести график цены всего инвентаря """
     plt.plot(x_all, y_all)
+    # fig, ax = plt.subplots()
+    plt.show()
+
+def show_market_count():
+    """ Вывести график количества выбранных предметов на ТП """
+    x = []
+    y = []
+    selected_item = combo.get()
+    for item in inventory['total']['items'].items():
+        if item[1]['name'] == selected_item:
+            for i in item[1]['market_count'].items():
+                x.append(i[0])
+                y.append(int(i[1]))
+    plt.plot(x, y)
     plt.show()
 
 for price in inventory['total']['total_price'].items():
@@ -54,13 +75,16 @@ for item in inventory['total']['items'].items():
 
 window = Tk()
 window.title("Steam Inventory")
-window.geometry('400x250')
+window.geometry('430x250')
 
-btn = Button(window, text="Построить график", command=clicked)
+btn = Button(window, text="График цены", command=clicked)
 btn.grid(column=1, row=0)
 
-btn = Button(window, text="Общий график", command=clicked_all)
-btn.grid(column=1, row=1)
+show_total_price_btn = Button(window, text="Общий график", command=clicked_all)
+show_total_price_btn.grid(column=1, row=1)
+
+show_market_count_btn = Button(window, text="График количества", command=show_market_count)
+show_market_count_btn.grid(column=1, row=2)
 
 container = IntVar()
 container.set(1)
@@ -102,12 +126,10 @@ rifle.set(1)
 rifle_checkbutton = ttk.Checkbutton(text="Rifle", variable=rifle, command=lambda: update_type_list(rifle, 'Rifle'))
 rifle_checkbutton.grid(column=3, row=7)
 
-combo = Combobox(window, state="readonly")
+combo = Combobox(window, state="readonly", width=30)
 combo['values'] = (sorted(item_list))
 combo.current(0)
 combo.grid(column=0, row=0)
-
-print(type_list)
 
 window.mainloop()
 
